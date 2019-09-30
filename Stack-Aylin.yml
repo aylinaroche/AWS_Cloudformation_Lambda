@@ -1,0 +1,28 @@
+Description:
+  Main Stack
+
+Mappings: 
+  RegionMap: 
+    us-west-2: 
+       HVM64: ami-082b5a644766e0e6f
+
+Resources: 
+  StackDynamodb: 
+    Type: AWS::CloudFormation::Stack
+    Properties: 
+      TemplateURL: "https://aylinbucket123.s3.amazonaws.com/Stack-Dynamodb.yml"
+
+  StackLambda: 
+    Type: AWS::CloudFormation::Stack
+    Properties: 
+      TemplateURL: "https://aylinbucket123.s3.amazonaws.com/Stack-Lambda.yml"
+
+  StackAPIGateway: 
+    Type: AWS::CloudFormation::Stack
+    Properties: 
+      TemplateURL: "https://aylinbucket123.s3.amazonaws.com/Stack-APIGateway.yml"
+      Parameters: 
+        LambdaFunctionAylin: 
+          !GetAtt StackLambda.Outputs.LambdaFunctionAylin
+        LambdaExecutionRoleAylin: 
+          !GetAtt StackLambda.Outputs.LambdaExecutionRoleAylin

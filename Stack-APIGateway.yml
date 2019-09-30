@@ -1,0 +1,92 @@
+
+Description:
+  File responsible for the creation of API Gateway
+
+Mappings: 
+  RegionMap: 
+    us-west-2: 
+       HVM64: ami-082b5a644766e0e6f
+
+Parameters: 
+  LambdaFunctionAylin:
+    Type: String
+    Description: Enter a valid ARN LambdaFunctionAylin 
+  LambdaExecutionRoleAylin:
+    Type: String
+    Description: Enter a valid ARN LambdaExecutionRoleAylin
+    
+Resources:
+  APIGatewayAylin:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: "APIGatewayAylin"
+      Description: "API Gateway Aylin"
+      EndpointConfiguration:
+        Types:
+        - REGIONAL
+
+  ResourceGetAylin:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayAylin
+      ParentId: !GetAtt 
+        - APIGatewayAylin
+        - RootResourceId
+      PathPart: "getInformation"
+    DependsOn:
+      - APIGatewayAylin    
+
+  ResourcePostAylin:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayAylin
+      ParentId: !GetAtt 
+        - APIGatewayAylin
+        - RootResourceId
+      PathPart: "postInformation"
+    DependsOn:
+      - APIGatewayAylin    
+
+  MethodGetAylin:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId: !Ref ResourceGetAylin
+      RestApiId: !Ref APIGatewayAylin
+      AuthorizationType: NONE
+      Integration:
+        Credentials: !Ref LambdaExecutionRoleAylin
+        IntegrationHttpMethod: POST
+        ConnectionType: INTERNET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionAylin}/invocations'
+    DependsOn:
+      - ResourceGetAylin
+
+  MethodPostAylin:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: POST
+      ResourceId: !Ref ResourcePostAylin
+      RestApiId: !Ref APIGatewayAylin
+      AuthorizationType: NONE
+      Integration:
+        Credentials: !Ref LambdaExecutionRoleAylin
+        IntegrationHttpMethod: POST
+        ConnectionType: INTERNET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionAylin}/invocations'
+    DependsOn:
+      - ResourcePostAylin
+
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunctionAylin
+      Action: 'lambda:InvokeFunction'
+      Principal: s3.amazonaws.com
+      SourceArn: 'arn:aws:apigateway:::*'

@@ -1,0 +1,30 @@
+
+Description:
+  File responsible for the creation of dynamodb
+
+Mappings: 
+  RegionMap: 
+    us-west-2: 
+       HVM64: ami-082b5a644766e0e6f
+
+Resources:
+  dynamodbAylin:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "tableAylin"
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+Outputs:
+  dynamodbAylin:
+    Description: The ID of the dynamodb
+    Value: !Ref dynamodbAylin
+    Export:
+      Name: "dynamodbAylin"

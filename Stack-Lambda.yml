@@ -1,0 +1,116 @@
+
+Description:
+  File responsible for the creation of Lamdba
+
+Mappings: 
+  RegionMap: 
+    us-west-2: 
+       HVM64: ami-082b5a644766e0e6f
+
+Resources:
+  LambdaExecutionRoleAylin: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      RoleName: "LambdaExecutionRoleAylin"
+      AssumeRolePolicyDocument: 
+        Statement: 
+          - Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal: 
+                Service: 
+                  - "lambda.amazonaws.com"
+                  - "apigateway.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+
+      Policies:
+        - PolicyName: "LambdaExecutionPolicyAylin"
+          PolicyDocument: 
+            Statement: 
+              - Effect: "Allow"
+                Sid: "VisualEditor0"
+                Action: "s3:*"
+                Resource: "*"
+              - Effect: "Allow"
+                Sid: "VisualEditor1"
+                Resource: "*"
+                Action: 
+                - "dynamodb:*"       
+                - "iam:GetRole"
+                - "iam:ListRoles"
+                - "lambda:CreateFunction"
+                - "lambda:ListFunctions"
+                - "lambda:ListEventSourceMappings"
+                - "lambda:CreateEventSourceMapping"
+                - "lambda:DeleteEventSourceMapping"
+                - "lambda:GetFunctionConfiguration"
+                - "lambda:DeleteFunction"
+                - "lambda:InvokeFunction"
+              - Effect: "Allow"
+                Sid: "VisualEditor2"
+                Action: 
+                - "logs:CreateLogGroup"
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: "Allow"
+                Sid: "VisualEditor3"
+                Action: 
+                - "logs:CreateLogGroup"
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+                - "logs:DescribeLogStreams"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: "Allow"
+                Sid: "VisualEditor4"
+                Action: 
+                - "s3:GetObjectAcl"
+                - "s3:GetObject"
+                Resource: "arn:aws:s3:::aylinbucket123/*"
+              - Effect: Allow
+                Sid: "VisualEditor5"
+                Action:
+                  - xray:PutTelemetryRecords
+                  - xray:PutTraceSegments
+                Resource: "*"
+              - Effect: Allow
+                Sid: "VisualEditor6"
+                Action:
+                  - apigateway:*
+                  - iam:PassRole
+                Resource: "*"
+
+  LambdaFunctionAylin: 
+    Type: "AWS::Lambda::Function"
+    Properties: 
+      FunctionName: "LambdaFunctionAylin"
+      Description: "Function to insert and get data of Dynamodb"
+      Handler: "index.lambda_handler"
+      Role: 
+        Fn::GetAtt: 
+          - "LambdaExecutionRoleAylin"
+          - "Arn"
+      Code: 
+        S3Bucket: "aylinbucket123"
+        S3Key: "MyLambdaFunction.zip"
+      Runtime: "python3.7"
+      Timeout: 25
+      TracingConfig:
+        Mode: "Active"
+
+Outputs:
+  LambdaFunctionAylin:
+    Description: "The ARN of the LambdaFunctionAylin"
+    Value: !GetAtt LambdaFunctionAylin.Arn
+    Export:
+      Name: "LambdaFunctionAylin"
+  LambdaExecutionRoleAylin:
+    Description: "The ID of the LambdaExecutionRoleAylin"
+    Value: !GetAtt LambdaExecutionRoleAylin.Arn
+    Export:
+      Name: "LambdaExecutionRoleAylin"
